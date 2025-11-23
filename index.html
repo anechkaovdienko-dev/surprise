@@ -6,201 +6,204 @@
 <style>
 body {
   font-family: sans-serif;
-  margin: 0; background: #f8e8ff;
-  overflow: hidden; height: 100vh;
+  margin: 0;
+  background: #f8e8ff;
+  overflow: hidden;
+  height: 100vh;
 }
 .center {
-  position:absolute; top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  z-index:10; display:flex; flex-direction:column; align-items:center;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center;
+  z-index: 10;
 }
 .box-btn-wrap {
-  width:180px; height:180px; position:relative;
-  cursor:pointer; margin-bottom: 42px;
-  transition:opacity 1s ease, transform 1s ease;
+  width: 180px; height: 180px;
+  cursor: pointer;
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 .box-btn-wrap.hide {
   opacity: 0;
-  pointer-events: none;
   transform: scale(0.85) rotate(-8deg);
+  pointer-events: none;
 }
-.box-img {
-  width: 100%; height: 100%; 
-  display: block; pointer-events:none; user-select:none;
-}
+.box-img { width: 100%; height: 100%; }
 .gift-text {
-  font-size: 26px; color: #de16a7; font-weight: bold;
+  font-size: 26px;
+  color: #de16a7;
+  font-weight: bold;
   text-shadow: 0 2px 8px #fff, 0 1px 0 #ffd8f3;
-  margin-top: 23px; user-select: none; letter-spacing: 1px;
-  text-align:center;
+  margin-top: 20px;
+  text-align: center;
 }
 .container {
-  position: absolute; width: 100vw; height: 100vh;
-  left: 0; top: 0; z-index: 50; display: none;
+  display: none;
+  position: absolute; width: 100%; height: 100%;
+  top: 0; left: 0;
+  z-index: 50;
+  background: #f8e8ff;
 }
 .img {
-  position: absolute; left: 0; top: 0; width: 100vw; height: 100vh;
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
   object-fit: contain;
-  opacity: 0; 
+  opacity: 0;
   transform: scale(0.7) translateY(50px);
   transition: opacity 0.9s ease, transform 0.9s ease;
-  z-index: 210;
   pointer-events: none;
 }
 .img.active {
-  opacity: 1; transform: scale(1) translateY(0px);
+  opacity: 1;
+  transform: scale(1) translateY(0);
   pointer-events: auto;
 }
 .navbtn {
-  position: absolute; top: 50%;
+  position: absolute;
+  top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.88);
+  background: rgba(255,255,255,0.9);
   color: #ff69b4;
-  border: none; font-size: 48px;
+  border: none;
+  font-size: 48px;
   border-radius: 24px;
-  padding: 0 18px; cursor: pointer;
-  z-index: 220; user-select: none;
+  padding: 0 18px;
+  cursor: pointer;
+  z-index: 220;
 }
-.navbtn:hover { background: #ffe8f6;}
+.navbtn:hover { background: #ffe8f6; }
 #prevBtn { left: 15px; }
 #nextBtn { right: 15px; }
 .fire-dot, .confetti-dot {
-  position: fixed; border-radius: 50%;
-  pointer-events: none; z-index: 400;
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 400;
 }
 .fire-dot.trail, .confetti-dot.trail { filter: blur(1px); opacity: 0.5; }
 </style>
 </head>
 <body>
 <div class="center">
-  <div class="box-btn-wrap" id="boxBtn" title="Открыть сюрприз">
+  <div class="box-btn-wrap" id="boxBtn">
     <img src="https://i.ibb.co/v4NpdCtw/pngwing-com-5.png" alt="Подарочная коробка" class="box-img">
   </div>
   <div class="gift-text">Открой коробку!</div>
 </div>
+
 <div class="container" id="box">
   <button class="navbtn" id="prevBtn">⟨</button>
   <button class="navbtn" id="nextBtn">⟩</button>
 </div>
+
 <script>
 const images = [
   'https://i.ibb.co/4ZCLJXQ3/IMG-5523.jpg',
   'https://i.ibb.co/bjJzsQdL/IMG-5525.jpg'
 ];
-const SLIDE_INTERVAL = 5000;
-let current = 0, autoSlideTimeout = null, box = null;
+let current = 0;
+let box = null;
+let autoSlideTimeout = null;
 
-// лёгкий фейерверк и конфетти
-function fireworkShow(done){
+// 🔥 Крупный фейерверк и конфетти
+function fireworkShow(done) {
   const cx = window.innerWidth/2, cy = window.innerHeight/2;
-  createFirework(cx, cy, 8);
-  createConfetti(cx, cy, 10);
-  setTimeout(done, 700); // короткая, плавная
+  for(let i=0;i<50;i++) createDot(cx, cy, 300, true);
+  for(let i=0;i<35;i++) createDot(cx, cy, 150, false);
+  setTimeout(done, 900);
 }
 
-function createFirework(cx, cy, count){
-  const colors=['#ff3232','#ffd700','#32ff5e','#44aaff','#d88cff','#ff69b4','#fff','#fa8500'];
-  for(let i=0;i<count;i++){
-    let dot=document.createElement('div');
-    dot.className='fire-dot';
-    let color=colors[Math.floor(Math.random()*colors.length)];
-    dot.style.width=dot.style.height='5px';
-    dot.style.background=color;
-    dot.style.left=cx+'px'; dot.style.top=cy+'px';
-    document.body.appendChild(dot);
-    animateDot(dot, cx+Math.random()*60-30, cy+Math.random()*60-30, 350);
-  }
+function createDot(cx, cy, radius, isFirework) {
+  const colors = isFirework ?
+    ['#ff3232','#ffd700','#32ff5e','#44aaff','#d88cff','#ff69b4','#fff','#fa8500'] :
+    ['#ff0','#0ff','#f0f','#0f0','#f00','#00f'];
+  const dot = document.createElement('div');
+  dot.className = isFirework ? 'fire-dot' : 'confetti-dot';
+  dot.style.width = dot.style.height = '6px';
+  dot.style.background = colors[Math.floor(Math.random()*colors.length)];
+  dot.style.left = cx + 'px';
+  dot.style.top = cy + 'px';
+  document.body.appendChild(dot);
+  animateDot(dot, cx + Math.random()*radius - radius/2, cy + Math.random()*radius - radius/2, 450 + Math.random()*150);
 }
 
-function createConfetti(cx, cy, count){
-  const colors=['#ff0','#0ff','#f0f','#0f0','#f00','#00f'];
-  for(let i=0;i<count;i++){
-    let dot=document.createElement('div');
-    dot.className='confetti-dot';
-    let color=colors[Math.floor(Math.random()*colors.length)];
-    dot.style.width=dot.style.height='5px';
-    dot.style.background=color;
-    dot.style.left=cx+'px'; dot.style.top=cy+'px';
-    document.body.appendChild(dot);
-    animateDot(dot, cx+Math.random()*80-40, cy+Math.random()*80-40, 450);
-  }
-}
-
-function animateDot(dot,toX,toY,duration){
-  const startX=parseFloat(dot.style.left), startY=parseFloat(dot.style.top);
-  let frame=0;
-  function step(){
+function animateDot(dot, toX, toY, duration) {
+  const startX = parseFloat(dot.style.left), startY = parseFloat(dot.style.top);
+  let frame = 0;
+  function step() {
     frame++;
-    let progress=frame/(duration/16); if(progress>1)progress=1;
-    let x=startX+(toX-startX)*progress;
-    let y=startY+(toY-startY)*progress;
-    dot.style.left=x+'px';
-    dot.style.top=y+'px';
+    let progress = frame/(duration/16); if(progress>1) progress=1;
+    dot.style.left = startX + (toX-startX)*progress + 'px';
+    dot.style.top = startY + (toY-startY)*progress + 'px';
     if(progress<1) requestAnimationFrame(step);
     else dot.remove();
   }
   step();
 }
 
-// изображения
-function renderImagesIfNeeded(){
-  let imgList=box.querySelectorAll('.img');
-  if(imgList.length!==images.length){
-    imgList.forEach(img=>img.remove());
+// 🔹 Рендерим картинки один раз
+function renderImagesIfNeeded() {
+  if(box.querySelectorAll('.img').length === 0){
     images.forEach(src=>{
-      const img=document.createElement('img');
-      img.src=src;
-      img.className='img';
+      const img = document.createElement('img');
+      img.src = src;
+      img.className = 'img';
       box.appendChild(img);
     });
   }
 }
 
 function showImage(idx){
-  renderImagesIfNeeded(); 
-  let imgList=box.querySelectorAll('.img');
+  renderImagesIfNeeded();
+  const imgList = box.querySelectorAll('.img');
   imgList.forEach((img,i)=>{
-    if(i===idx) setTimeout(()=>img.classList.add('active'),80);
+    if(i === idx) setTimeout(()=>img.classList.add('active'), 160);
     else img.classList.remove('active');
   });
 }
 
-function showPrev(){ current=(current-1+images.length)%images.length; showImage(current); setupAutoSlide(); }
-function showNext(){ current=(current+1)%images.length; showImage(current); setupAutoSlide(); }
-
-function setupAutoSlide(){
+// 🔹 Навигация
+function showPrev() {
+  current = (current - 1 + images.length) % images.length;
+  showImage(current);
+  setupAutoSlide();
+}
+function showNext() {
+  current = (current + 1) % images.length;
+  showImage(current);
+  setupAutoSlide();
+}
+function setupAutoSlide() {
   clearAutoSlide();
-  autoSlideTimeout=setTimeout(function autoSlideFn(){
-    current=(current+1)%images.length; showImage(current);
-    autoSlideTimeout=setTimeout(autoSlideFn,SLIDE_INTERVAL);
-  }, SLIDE_INTERVAL);
+  autoSlideTimeout = setTimeout(function autoSlideFn() {
+    current = (current + 1) % images.length;
+    showImage(current);
+    autoSlideTimeout = setTimeout(autoSlideFn, 5000);
+  }, 5000);
+}
+function clearAutoSlide() {
+  if(autoSlideTimeout) clearTimeout(autoSlideTimeout);
 }
 
-function clearAutoSlide(){ if(autoSlideTimeout) clearTimeout(autoSlideTimeout); autoSlideTimeout=null; }
-
-function showSurprise(){
-  box=document.getElementById('box');
-  const btn=document.getElementById('boxBtn');
-  btn.classList.remove('hide');
-  box.style.display='none';
-  box.querySelectorAll('.img').forEach(el=>el.remove());
-  clearAutoSlide(); current=0;
+// 🔹 Открыть коробку
+function showSurprise() {
+  box = document.getElementById('box');
+  const btn = document.getElementById('boxBtn');
   btn.classList.add('hide');
-  setTimeout(()=>{
-    fireworkShow(function(){
-      box.style.display='block';
-      renderImagesIfNeeded();
-      showImage(current);
-      setupAutoSlide();
-    });
-  },700);
+  fireworkShow(()=>{
+    box.style.display = 'block';
+    current = 0;
+    showImage(current);
+    setupAutoSlide();
+  });
 }
 
-document.addEventListener("DOMContentLoaded",function(){
-  box=document.getElementById('box');
-  document.getElementById('boxBtn').addEventListener('click',showSurprise);
-  document.getElementById('prevBtn').addEventListener('click',showPrev);
-  document.getElementById('nextBtn').addEventListener('click',showNext);
+// события
+document.addEventListener("DOMContentLoaded", ()=>{
+  box = document.getElementById('box');
+  document.getElementById('boxBtn').addEventListener('click', showSurprise);
+  document.getElementById('prevBtn').addEventListener('click', showPrev);
+  document.getElementById('nextBtn').addEventListener('click', showNext);
 });
 </script>
 </body>
