@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Сюрприз — очень плавно</title>
+<style>
+body {
+  font-family: sans-serif;
+  margin: 0; background: #f8e8ff;
+  overflow: hidden; height: 100vh;
+}
+.center {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  z-index:10; display:flex; flex-direction:column; align-items:center;
+}
+.box-btn-wrap {
+  width:180px; height:180px; position:relative;
+  cursor:pointer; margin-bottom: 42px;
+  transition:opacity 1.25s cubic-bezier(.42,1.48,.53,1.01), transform 1.17s cubic-bezier(.72,1.7,.23,1);
+}
+.box-btn-wrap.hide {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.85) rotate(-8deg);
+}
+.box-img {
+  width: 100%; height: 100%; 
+  display: block; pointer-events:none; user-select:none;
+}
+.gift-text {
+  font-size: 26px; color: #de16a7; font-weight: bold;
+  text-shadow: 0 2px 14px #fff, 0 1px 0 #ffd8f3;
+  margin-top: 23px; user-select: none; letter-spacing: 1.2px;
+  text-align:center;
+}
+.container {
+  position: absolute; width: 100vw; height: 100vh;
+  left: 0; top: 0; z-index: 50; display: none;
+}
+.img {
+  position: absolute; left: 0; top: 0; width: 100vw; height: 100vh;
+  object-fit: contain;
+  opacity: 0; 
+  transform: scale(0.7) translateY(80px);
+  transition: opacity 1.18s cubic-bezier(.31,1.38,.44,1), transform 1.2s cubic-bezier(.31,1.38,.44,1);
+  z-index: 210;
+  box-shadow: 0 8px 56px #d23cff39;
+  pointer-events: none;
+}
+.img.active {
+  opacity: 1; transform: scale(1) translateY(0px);
+  pointer-events: auto;
+}
+.navbtn {
+  position: absolute; top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.88);
+  color: #ff69b4;
+  border: none; font-size: 48px;
+  border-radius: 24px;
+  padding: 0 18px; cursor: pointer;
+  z-index: 220; user-select: none;
+  box-shadow: 0 2px 8px #ffeffa;
+  transition: background 0.15s;
+}
+.navbtn:hover { background: #ffe8f6;}
+#prevBtn { left: 30px; }
+#nextBtn { right: 30px; }
+.fire-dot {
+  position: fixed; left: 0; top: 0; border-radius: 50%;
+  pointer-events: none; z-index: 400;
+  transition: filter 0.2s;
+}
+.fire-dot.trail { filter: blur(1.5px); opacity: 0.7; }
+</style>
+</head>
+<body>
+<div class="center">
+  <div class="box-btn-wrap" id="boxBtn" title="Открыть сюрприз">
+    <img src="https://i.ibb.co/v4NpdCtw/pngwing-com-5.png"
+         alt="Подарочная коробка" class="box-img">
+  </div>
+  <div class="gift-text">Открой коробку!</div>
+</div>
+<div class="container" id="box">
+  <button class="navbtn" id="prevBtn">⟨</button>
+  <button class="navbtn" id="nextBtn">⟩</button>
+</div>
+<script>
+const images = [
+  'https://i.ibb.co/4ZCLJXQ3/IMG-5523.jpg',
+  'https://i.ibb.co/bjJzsQdL/IMG-5525.jpg'
+];
+const SLIDE_INTERVAL = 5000;
+let current = 0, autoSlideTimeout = null, box = null;
+
+function fireworkShow(done) {
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+  let bursts = 3;
+  for (let burst=0; burst < bursts; burst++) {
+    setTimeout(()=> {
+      fireworkBurst(
+        cx + (Math.random()-0.5)*90, 
+        cy + (Math.random()-0.7)*120, 
+        32 + Math.floor(Math.random()*12),
+        burst === bursts-1 ? onFinish : null
+      );
+    }, burst*250);
+  }
+  function onFinish() { setTimeout(done, 1000); }
+}
+function fireworkBurst(cx, cy, count=36, onFinish) {
+  const endRadius = 160+Math.random()*80,
+    colors = ['#ff3232','#ffd700','#32ff5e','#44aaff','#d88cff','#ff69b4','#fff','#fa8500'];
+  let finishedCount = 0;
+  for(let p=0; p<count; p++) {
+    let angle=2*Math.PI*p/count+Math.random()*0.12-0.06;
+    let r=endRadius*(0.85+Math.random()*0.3);
+    let toX=cx+Math.cos(angle)*r, toY=cy+Math.sin(angle)*r,
+      color=colors[Math.floor(Math.random()*colors.length)];
+    let size=9+Math.random()*7, duration=950+Math.random()*520;
+    createFireDot(cx,cy,toX,toY,color,size,duration,()=> {
+      finishedCount++;
+      if(onFinish&&finishedCount===count)onFinish();
+    });
+  }
+}
+function createFireDot(fromX,fromY,toX,toY,color,size,duration,cb){
+  const dot = document.createElement('div');
+  dot.className = 'fire-dot'; dot.style.width = size+'px';
+  dot.style.height = size+'px'; dot.style.background = color;
+  dot.style.boxShadow = `0 0 18px 3px ${color}`;
+  dot.style.left = (fromX-size/2)+'px'; dot.style.top = (fromY-size/2)+'px';
+  document.body.appendChild(dot);
+  let prevX=fromX, prevY=fromY, frame=0;
+  function moveDot(){
+    frame++;
+    let progress=frame/(duration/16); if(progress>1)progress=1;
+    let x=fromX+(toX-fromX)*progress, y=fromY+(toY-fromY)*progress;
+    dot.style.left=(x-size/2)+'px'; dot.style.top=(y-size/2)+'px';
+    if(frame%2===0&&progress>0.1&&progress<0.93) {
+      let t=dot.cloneNode(); t.classList.add('trail');
+      t.style.opacity=0.11+Math.random()*0.23; document.body.appendChild(t);
+      t.style.left=(prevX-size/2)+'px'; t.style.top=(prevY-size/2)+'px';
+      setTimeout(()=>t.remove(),540); prevX=x; prevY=y;
+    }
+    if(progress<1)requestAnimationFrame(moveDot);
+    else{ dot.style.transition = "opacity .6s cubic-bezier(.21,1,.61,1)";
+        dot.style.opacity=0;
+        setTimeout(()=>{dot.remove();if(typeof cb==='function')cb();},450);}
+  }
+  moveDot();
+}
+function renderImagesIfNeeded() {
+  let imgList = box.querySelectorAll('.img');
+  if (imgList.length !== images.length) {
+    imgList.forEach(img => img.remove());
+    images.forEach(src => {
+      const img = document.createElement('img');
+      img.src = src;
+      img.className = 'img';
+      box.appendChild(img);
+    });
+  }
+}
+function showImage(idx){
+  renderImagesIfNeeded(); let imgList=box.querySelectorAll('.img');
+  imgList.forEach((img,i)=>{
+    if(i === idx) setTimeout(()=>img.classList.add('active'),160);
+    else img.classList.remove('active');
+  });
+}
+function showPrev() {
+  current = (current - 1 + images.length) % images.length;
+  showImage(current); setupAutoSlide();
+}
+function showNext() {
+  current = (current + 1) % images.length;
+  showImage(current); setupAutoSlide();
+}
+function setupAutoSlide() {
+  clearAutoSlide();
+  autoSlideTimeout = setTimeout(function autoSlideFn() {
+    current = (current + 1) % images.length;
+    showImage(current);
+    autoSlideTimeout = setTimeout(autoSlideFn, SLIDE_INTERVAL);
+  }, SLIDE_INTERVAL);
+}
+function clearAutoSlide() {
+  if(autoSlideTimeout)clearTimeout(autoSlideTimeout); autoSlideTimeout=null;
+}
+function showSurprise() {
+  box = document.getElementById('box');
+  const btn = document.getElementById('boxBtn');
+  btn.classList.remove('hide');
+  box.style.display = 'none';
+  box.querySelectorAll('.img').forEach(el => el.remove());
+  clearAutoSlide(); current=0;
+  btn.classList.add('hide');
+  setTimeout(()=>{
+    fireworkShow(function() {
+      box.style.display = 'block';
+      renderImagesIfNeeded();
+      showImage(current);
+      setupAutoSlide();
+    });
+  },1250); // столько же как transition у коробки
+}
+document.addEventListener("DOMContentLoaded",function(){
+  box = document.getElementById('box');
+  document.getElementById('boxBtn').addEventListener('click', showSurprise);
+  document.getElementById('prevBtn').addEventListener('click', showPrev);
+  document.getElementById('nextBtn').addEventListener('click', showNext);
+});
+</script>
+</body>
+</html>
