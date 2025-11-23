@@ -95,63 +95,79 @@ const images = [
 const SLIDE_INTERVAL = 5000;
 let current = 0, autoSlideTimeout = null, box = null;
 
+// ускоренный фейерверк
 function fireworkShow(done) {
   const cx = window.innerWidth/2, cy = window.innerHeight/2;
-  let bursts = 3;
+  let bursts = 2;
   for (let burst=0; burst < bursts; burst++) {
     setTimeout(()=> {
       fireworkBurst(
-        cx + (Math.random()-0.5)*90, 
-        cy + (Math.random()-0.7)*120, 
-        32 + Math.floor(Math.random()*12),
+        cx + (Math.random()-0.5)*80, 
+        cy + (Math.random()-0.7)*100, 
+        24 + Math.floor(Math.random()*8),
         burst === bursts-1 ? onFinish : null
       );
-    }, burst*250);
+    }, burst*150);
   }
-  function onFinish() { setTimeout(done, 1000); }
+  function onFinish() { setTimeout(done, 600); }
 }
-function fireworkBurst(cx, cy, count=36, onFinish) {
-  const endRadius = 160+Math.random()*80,
-    colors = ['#ff3232','#ffd700','#32ff5e','#44aaff','#d88cff','#ff69b4','#fff','#fa8500'];
+
+function fireworkBurst(cx, cy, count=30, onFinish) {
+  const endRadius = 120+Math.random()*50,
+        colors = ['#ff3232','#ffd700','#32ff5e','#44aaff','#d88cff','#ff69b4','#fff','#fa8500'];
   let finishedCount = 0;
   for(let p=0; p<count; p++) {
-    let angle=2*Math.PI*p/count+Math.random()*0.12-0.06;
-    let r=endRadius*(0.85+Math.random()*0.3);
-    let toX=cx+Math.cos(angle)*r, toY=cy+Math.sin(angle)*r,
-      color=colors[Math.floor(Math.random()*colors.length)];
-    let size=9+Math.random()*7, duration=950+Math.random()*520;
-    createFireDot(cx,cy,toX,toY,color,size,duration,()=> {
+    let angle = 2*Math.PI*p/count + Math.random()*0.12-0.06;
+    let r = endRadius*(0.85 + Math.random()*0.3);
+    let toX = cx + Math.cos(angle)*r, toY = cy + Math.sin(angle)*r;
+    let color = colors[Math.floor(Math.random()*colors.length)];
+    let size = 7 + Math.random()*5, duration = 600 + Math.random()*300;
+    createFireDot(cx, cy, toX, toY, color, size, duration, () => {
       finishedCount++;
-      if(onFinish&&finishedCount===count)onFinish();
+      if(onFinish && finishedCount===count) onFinish();
     });
   }
 }
-function createFireDot(fromX,fromY,toX,toY,color,size,duration,cb){
+
+function createFireDot(fromX, fromY, toX, toY, color, size, duration, cb) {
   const dot = document.createElement('div');
-  dot.className = 'fire-dot'; dot.style.width = size+'px';
-  dot.style.height = size+'px'; dot.style.background = color;
-  dot.style.boxShadow = `0 0 18px 3px ${color}`;
-  dot.style.left = (fromX-size/2)+'px'; dot.style.top = (fromY-size/2)+'px';
+  dot.className = 'fire-dot';
+  dot.style.width = size+'px';
+  dot.style.height = size+'px';
+  dot.style.background = color;
+  dot.style.boxShadow = `0 0 12px 2px ${color}`;
+  dot.style.left = (fromX-size/2)+'px';
+  dot.style.top = (fromY-size/2)+'px';
   document.body.appendChild(dot);
-  let prevX=fromX, prevY=fromY, frame=0;
-  function moveDot(){
+  let prevX = fromX, prevY = fromY, frame = 0;
+
+  function moveDot() {
     frame++;
-    let progress=frame/(duration/16); if(progress>1)progress=1;
-    let x=fromX+(toX-fromX)*progress, y=fromY+(toY-fromY)*progress;
-    dot.style.left=(x-size/2)+'px'; dot.style.top=(y-size/2)+'px';
-    if(frame%2===0&&progress>0.1&&progress<0.93) {
-      let t=dot.cloneNode(); t.classList.add('trail');
-      t.style.opacity=0.11+Math.random()*0.23; document.body.appendChild(t);
-      t.style.left=(prevX-size/2)+'px'; t.style.top=(prevY-size/2)+'px';
-      setTimeout(()=>t.remove(),540); prevX=x; prevY=y;
+    let progress = frame/(duration/16); if(progress>1)progress=1;
+    let x = fromX + (toX-fromX)*progress;
+    let y = fromY + (toY-fromY)*progress;
+    dot.style.left = (x-size/2)+'px';
+    dot.style.top = (y-size/2)+'px';
+
+    if(frame%2===0 && progress>0.1 && progress<0.93){
+      let t = dot.cloneNode(); t.classList.add('trail');
+      t.style.opacity = 0.12 + Math.random()*0.2; document.body.appendChild(t);
+      t.style.left = (prevX-size/2)+'px'; t.style.top = (prevY-size/2)+'px';
+      setTimeout(()=>t.remove(), 450);
+      prevX = x; prevY = y;
     }
-    if(progress<1)requestAnimationFrame(moveDot);
-    else{ dot.style.transition = "opacity .6s cubic-bezier(.21,1,.61,1)";
-        dot.style.opacity=0;
-        setTimeout(()=>{dot.remove();if(typeof cb==='function')cb();},450);}
+
+    if(progress<1) requestAnimationFrame(moveDot);
+    else {
+      dot.style.transition = "opacity .4s cubic-bezier(.21,1,.61,1)";
+      dot.style.opacity = 0;
+      setTimeout(()=>{dot.remove(); if(cb) cb();}, 300);
+    }
   }
   moveDot();
 }
+
+// остальной код управления изображениями
 function renderImagesIfNeeded() {
   let imgList = box.querySelectorAll('.img');
   if (imgList.length !== images.length) {
@@ -205,7 +221,7 @@ function showSurprise() {
       showImage(current);
       setupAutoSlide();
     });
-  },1250); // столько же как transition у коробки
+  },1250);
 }
 document.addEventListener("DOMContentLoaded",function(){
   box = document.getElementById('box');
