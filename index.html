@@ -11,15 +11,60 @@ body {
   overflow: hidden;
   height: 100vh;
 }
+
+#passwordScreen {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #f8e8ff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+#passwordScreen h2 {
+  color: #d4169f;
+  margin-bottom: 20px;
+  font-size: 30px;
+}
+#passwordInput {
+  font-size: 24px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px solid #d4169f;
+  outline: none;
+  text-align: center;
+}
+#passwordBtn {
+  margin-top: 18px;
+  font-size: 22px;
+  padding: 10px 18px;
+  background: #ff7edb;
+  border: none;
+  color: white;
+  border-radius: 14px;
+  cursor: pointer;
+}
+#passwordError {
+  margin-top: 12px;
+  color: red;
+  font-size: 18px;
+  height: 22px;
+}
+
 .center {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  display: flex; flex-direction: column; align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   z-index: 10;
 }
 .box-btn-wrap {
-  width: 180px; height: 180px;
+  width: 260px;
+  height: 260px;
   cursor: pointer;
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
@@ -30,12 +75,13 @@ body {
 }
 .box-img { width: 100%; height: 100%; }
 .gift-text {
-  font-size: 26px;
+  font-size: 32px;
   color: #de16a7;
   font-weight: bold;
-  text-shadow: 0 2px 8px #fff, 0 1px 0 #ffd8f3;
   margin-top: 20px;
   text-align: center;
+  width: 100%;
+  text-shadow: 0 2px 8px #fff;
 }
 .container {
   display: none;
@@ -62,33 +108,45 @@ body {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.9);
-  color: #ff69b4;
+  background: #ff3258;
+  color: white;
   border: none;
-  font-size: 48px;
-  border-radius: 24px;
-  padding: 0 18px;
+  font-size: 56px;
+  border-radius: 26px;
+  padding: 0 22px;
   cursor: pointer;
   z-index: 220;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+  transition: 0.2s;
 }
-.navbtn:hover { background: #ffe8f6; }
-#prevBtn { left: 15px; }
-#nextBtn { right: 15px; }
+.navbtn:hover {
+  background: #ff163b;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+}
+#prevBtn { left: 20px; }
+#nextBtn { right: 20px; }
 .fire-dot, .confetti-dot {
   position: fixed;
   border-radius: 50%;
   pointer-events: none;
   z-index: 400;
 }
-.fire-dot.trail, .confetti-dot.trail { filter: blur(1px); opacity: 0.5; }
 </style>
 </head>
 <body>
-<div class="center">
+
+<div id="passwordScreen">
+  <h2>Введите пароль</h2>
+  <input id="passwordInput" type="password" maxlength="4" placeholder="****">
+  <button id="passwordBtn">ОК</button>
+  <div id="passwordError"></div>
+</div>
+
+<div class="center" id="giftScreen" style="display:none;">
   <div class="box-btn-wrap" id="boxBtn">
-    <img src="https://i.ibb.co/v4NpdCtw/pngwing-com-5.png" alt="Подарочная коробка" class="box-img">
+    <img src="https://i.ibb.co/v4NpdCtw/pngwing-com-5.png" class="box-img">
   </div>
-  <div class="gift-text">Открой коробку!</div>
+  <div class="gift-text">НЕ ОТКРЫВАЙ КОРОБКУ!</div>
 </div>
 
 <div class="container" id="box">
@@ -105,43 +163,42 @@ let current = 0;
 let box = null;
 let autoSlideTimeout = null;
 
-// 🔥 Крупный фейерверк и конфетти
 function fireworkShow(done) {
-  const cx = window.innerWidth/2, cy = window.innerHeight/2;
-  for(let i=0;i<50;i++) createDot(cx, cy, 300, true);
-  for(let i=0;i<35;i++) createDot(cx, cy, 150, false);
-  setTimeout(done, 900);
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  for (let i = 0; i < 90; i++) createDot(cx, cy, 380, true);
+  for (let i = 0; i < 60; i++) createDot(cx, cy, 260, false);
+  setTimeout(done, 1100);
 }
-
-function createDot(cx, cy, radius, isFirework) {
-  const colors = isFirework ?
-    ['#ff3232','#ffd700','#32ff5e','#44aaff','#d88cff','#ff69b4','#fff','#fa8500'] :
-    ['#ff0','#0ff','#f0f','#0f0','#f00','#00f'];
+function createDot(cx, cy, radius, fire) {
+  const colors = fire ? ['#ff3232','#ffd700','#32ff5e','#44aaff','#d88cff','#ff69b4','#fff','#fa8500'] : ['#ffea00','#00eaff','#ff00f2','#00ff5e','#ff0000','#003cff'];
   const dot = document.createElement('div');
-  dot.className = isFirework ? 'fire-dot' : 'confetti-dot';
-  dot.style.width = dot.style.height = '6px';
+  dot.className = fire ? 'fire-dot' : 'confetti-dot';
+  const size = fire ? 6 + Math.random()*6 : 5 + Math.random()*4;
+  dot.style.width = size + 'px';
+  dot.style.height = size + 'px';
   dot.style.background = colors[Math.floor(Math.random()*colors.length)];
   dot.style.left = cx + 'px';
   dot.style.top = cy + 'px';
   document.body.appendChild(dot);
-  animateDot(dot, cx + Math.random()*radius - radius/2, cy + Math.random()*radius - radius/2, 450 + Math.random()*150);
+  const targetX = cx + (Math.random() * radius - radius/2);
+  const targetY = cy + (Math.random() * radius - radius/2);
+  animateDot(dot, targetX, targetY, 450 + Math.random()*300);
 }
-
-function animateDot(dot, toX, toY, duration) {
-  const startX = parseFloat(dot.style.left), startY = parseFloat(dot.style.top);
-  let frame = 0;
+function animateDot(dot, x, y, dur) {
+  const sx = parseFloat(dot.style.left), sy = parseFloat(dot.style.top);
+  let f = 0;
   function step() {
-    frame++;
-    let progress = frame/(duration/16); if(progress>1) progress=1;
-    dot.style.left = startX + (toX-startX)*progress + 'px';
-    dot.style.top = startY + (toY-startY)*progress + 'px';
-    if(progress<1) requestAnimationFrame(step);
-    else dot.remove();
+    f++;
+    let p = f / (dur / 16);
+    if (p > 1) p = 1;
+    dot.style.left = sx + (x - sx) * p + 'px';
+    dot.style.top = sy + (y - sy) * p + 'px';
+    dot.style.opacity = 1 - p;
+    if (p < 1) requestAnimationFrame(step); else dot.remove();
   }
   step();
 }
-
-// 🔹 Рендерим картинки один раз
 function renderImagesIfNeeded() {
   if(box.querySelectorAll('.img').length === 0){
     images.forEach(src=>{
@@ -152,7 +209,6 @@ function renderImagesIfNeeded() {
     });
   }
 }
-
 function showImage(idx){
   renderImagesIfNeeded();
   const imgList = box.querySelectorAll('.img');
@@ -161,8 +217,6 @@ function showImage(idx){
     else img.classList.remove('active');
   });
 }
-
-// 🔹 Навигация
 function showPrev() {
   current = (current - 1 + images.length) % images.length;
   showImage(current);
@@ -181,11 +235,7 @@ function setupAutoSlide() {
     autoSlideTimeout = setTimeout(autoSlideFn, 5000);
   }, 5000);
 }
-function clearAutoSlide() {
-  if(autoSlideTimeout) clearTimeout(autoSlideTimeout);
-}
-
-// 🔹 Открыть коробку
+function clearAutoSlide() { if(autoSlideTimeout) clearTimeout(autoSlideTimeout); }
 function showSurprise() {
   box = document.getElementById('box');
   const btn = document.getElementById('boxBtn');
@@ -197,8 +247,15 @@ function showSurprise() {
     setupAutoSlide();
   });
 }
-
-// события
+document.getElementById('passwordBtn').onclick = function() {
+  const val = document.getElementById('passwordInput').value.trim();
+  if(val === "2802") {
+    document.getElementById('passwordScreen').style.display = "none";
+    document.getElementById('giftScreen').style.display = "flex";
+  } else {
+    document.getElementById('passwordError').innerText = "Неверный пароль!";
+  }
+};
 document.addEventListener("DOMContentLoaded", ()=>{
   box = document.getElementById('box');
   document.getElementById('boxBtn').addEventListener('click', showSurprise);
