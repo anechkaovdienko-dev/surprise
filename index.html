@@ -171,7 +171,7 @@ body {
   justify-content: center;
   align-items: center;
   
-  /* УМЕНЬШЕНА/УБРАНА "БЕЛАЯ РАМКА". Оставил минимальный паддинг. */
+  /* ТОНКАЯ "БЕЛАЯ РАМКА" для размещения кнопок */
   padding: 0 10px; 
 }
 
@@ -193,20 +193,20 @@ body {
   background: red;
   color: white;
   border: none;
-  /* УМЕНЬШЕН РАЗМЕР КНОПКИ */
-  font-size: 40px; 
+  /* ОЧЕНЬ МАЛЕНЬКИЙ РАЗМЕР КНОПКИ */
+  font-size: 24px; 
   border-radius: 14px;
-  /* НЕМНОГО УМЕНЬШЕН PADDING */
-  padding: 0 16px; 
+  /* УМЕНЬШЕННЫЙ PADDING */
+  padding: 0 10px; 
   cursor: pointer;
   z-index: 10000;
   opacity: 0.8;
 }
 .navbtn:hover { opacity: 1; }
 
-/* ИЗМЕНЕН: Кнопки СДВИНУТЫ БЛИЖЕ К КАРТИНКЕ (за счет отрицательного значения) */
-#prevBtn { left: -20px; }   
-#nextBtn { right: -20px; }
+/* Кнопки прижимаются к краю ТОНКОЙ РАМКИ */
+#prevBtn { left: 0; }   
+#nextBtn { right: 0; }
 
 /* ---------- Мобильные кнопки ---------- */
 @media (max-width: 600px) {
@@ -216,15 +216,15 @@ body {
     }
     
   .navbtn {
-    /* УМЕНЬШЕН РАЗМЕР КНОПКИ */
-    font-size: 30px;
-    padding: 0 12px;
+    /* ОЧЕНЬ МАЛЕНЬКИЙ РАЗМЕР КНОПКИ */
+    font-size: 20px;
+    padding: 0 8px;
     opacity: 0.5;
   }
   
-  /* ИЗМЕНЕН: Кнопки СДВИНУТЫ БЛИЖЕ К КАРТИНКЕ */
-  #prevBtn { left: -10px; }   
-  #nextBtn { right: -10px; }
+  /* Кнопки прижимаются к краю ТОНКОЙ РАМКИ */
+  #prevBtn { left: 0; }   
+  #nextBtn { right: 0; }
   
   .gift-box__emoji { font-size: 9em; }
   .gift-box__btn { font-size: 1.5em; }
