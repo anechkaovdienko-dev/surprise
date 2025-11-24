@@ -2,231 +2,106 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Сюрприз от Александры</title>
-<style>
-body {
-  font-family: sans-serif;
-  margin: 0;
-  background: #f8e8ff;
-  overflow: hidden;
-  height: 100vh;
-}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сюрприз</title>
 
-#passwordScreen {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: #f8e8ff;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-#passwordScreen h2 {
-  color: #d4169f;
-  margin-bottom: 20px;
-  font-size: 30px;
-}
-#passwordInput {
-  font-size: 24px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 2px solid #d4169f;
-  outline: none;
-  text-align: center;
-}
-#passwordBtn {
-  margin-top: 18px;
-  font-size: 22px;
-  padding: 10px 18px;
-  background: #ff7edb;
-  border: none;
-  color: white;
-  border-radius: 14px;
-  cursor: pointer;
-}
-#passwordError {
-  margin-top: 12px;
-  color: red;
-  font-size: 18px;
-  height: 22px;
-}
+<script type="module">
+import { Application, Controller } from "https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/+esm";
+import confetti from "https://cdn.skypack.dev/canvas-confetti";
 
-.center {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 10;
-}
-.box-btn-wrap {
-  width: 260px;
-  height: 260px;
-  cursor: pointer;
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-.box-btn-wrap.hide {
-  opacity: 0;
-  transform: scale(0.85) rotate(-8deg);
-  pointer-events: none;
-}
-.box-img { width: 100%; height: 100%; }
-.gift-text {
-  font-size: 32px;
-  color: #de16a7;
-  font-weight: bold;
-  margin-top: 20px;
-  text-align: center;
-  width: 100%;
-  text-shadow: 0 2px 8px #fff;
-}
-.container {
-  display: none;
-  position: absolute; width: 100%; height: 100%;
-  top: 0; left: 0;
-  z-index: 50;
-  background: #f8e8ff;
-}
-.img {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%;
-  object-fit: contain;
-  opacity: 0;
-  transform: scale(0.7) translateY(50px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-  pointer-events: none;
-}
-.img.active {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-  pointer-events: auto;
-}
-.navbtn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #ff3258;
-  color: white;
-  border: none;
-  font-size: 56px;
-  border-radius: 26px;
-  padding: 0 22px;
-  cursor: pointer;
-  z-index: 220;
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
-  transition: 0.2s;
-}
-.navbtn:hover {
-  background: #ff163b;
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
-}
-#prevBtn { left: 20px; }
-#nextBtn { right: 20px; }
-.fire-dot, .confetti-dot {
-  position: fixed;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 400;
-}
-</style>
-</head>
-<body>
+const application = Application.start();
 
-<div id="passwordScreen">
-  <h2>Введите пароль</h2>
-  <input id="passwordInput" type="password" maxlength="4" placeholder="****">
-  <button id="passwordBtn">ОК</button>
-  <div id="passwordError"></div>
-</div>
+class GiftBoxController extends Controller {
+  static targets = ["emoji", "claimBtn", "message"];
 
-<div class="center" id="giftScreen" style="display:none;">
-  <div class="box-btn-wrap" id="boxBtn">
-    <img src="https://i.ibb.co/v4NpdCtw/pngwing-com-5.png" class="box-img">
-  </div>
-  <div class="gift-text">НЕ ОТКРЫВАЙ КОРОБКУ!</div>
-</div>
+  claim() {
+    const userPass = prompt("Введите пароль:");
 
-<div class="container" id="box">
-  <button class="navbtn" id="prevBtn">⟨</button>
-  <button class="navbtn" id="nextBtn">⟩</button>
-</div>
+    if (userPass !== "2802") {
+      alert("Неверный пароль!");
+      return;
+    }
 
-<script>
-const images = [
-  'https://i.ibb.co/4ZCLJXQ3/IMG-5523.jpg',
-  'https://i.ibb.co/bjJzsQdL/IMG-5525.jpg'
-];
-let current = 0;
-let box = null;
-let autoSlideTimeout = null;
+    this.emojiTarget.classList.remove("joggle");
+    void this.emojiTarget.offsetWidth;
+    this.emojiTarget.classList.add("gift-box__emoji--claimed");
+    this.claimBtnTarget.hidden = true;
 
-function fireworkShow(done) {
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
-  for (let i = 0; i < 90; i++) createDot(cx, cy, 380, true);
-  for (let i = 0; i < 60; i++) createDot(cx, cy, 260, false);
-  setTimeout(done, 1100);
-}
-function createDot(cx, cy, radius, fire) {
-  const colors = fire ? ['#ff3232','#ffd700','#32ff5e','#44aaff','#d88cff','#ff69b4','#fff','#fa8500'] : ['#ffea00','#00eaff','#ff00f2','#00ff5e','#ff0000','#003cff'];
-  const dot = document.createElement('div');
-  dot.className = fire ? 'fire-dot' : 'confetti-dot';
-  const size = fire ? 6 + Math.random()*6 : 5 + Math.random()*4;
-  dot.style.width = size + 'px';
-  dot.style.height = size + 'px';
-  dot.style.background = colors[Math.floor(Math.random()*colors.length)];
-  dot.style.left = cx + 'px';
-  dot.style.top = cy + 'px';
-  document.body.appendChild(dot);
-  const targetX = cx + (Math.random() * radius - radius/2);
-  const targetY = cy + (Math.random() * radius - radius/2);
-  animateDot(dot, targetX, targetY, 450 + Math.random()*300);
-}
-function animateDot(dot, x, y, dur) {
-  const sx = parseFloat(dot.style.left), sy = parseFloat(dot.style.top);
-  let f = 0;
-  function step() {
-    f++;
-    let p = f / (dur / 16);
-    if (p > 1) p = 1;
-    dot.style.left = sx + (x - sx) * p + 'px';
-    dot.style.top = sy + (y - sy) * p + 'px';
-    dot.style.opacity = 1 - p;
-    if (p < 1) requestAnimationFrame(step); else dot.remove();
+    setTimeout(() => {
+      this.messageTarget.classList.remove("gift-box__message--hidden");
+      this.emojiTarget.hidden = true;
+
+      // 🔥 Конфетти поверх всего
+      const confettiLayer = document.createElement("canvas");
+      confettiLayer.style.position = "fixed";
+      confettiLayer.style.top = 0;
+      confettiLayer.style.left = 0;
+      confettiLayer.style.width = "100vw";
+      confettiLayer.style.height = "100vh";
+      confettiLayer.style.pointerEvents = "none";
+      confettiLayer.style.zIndex = "10001";
+      document.body.appendChild(confettiLayer);
+
+      confetti.create(confettiLayer, { resize: true })({
+        particleCount: 200,
+        spread: 100,
+        origin: { y: 0.25 }
+      });
+
+      // Показ слайдов
+      const slidesContainer = document.getElementById("slides");
+      slidesContainer.style.display = "flex";
+      current = 0;
+      showImage(current);
+      setupAutoSlide();
+    }, 500);
   }
-  step();
 }
+
+application.register("gift-box", GiftBoxController);
+
+// ---------- Слайды ----------
+const images = [
+  "https://i.ibb.co/4ZCLJXQ3/IMG-5523.jpg",
+  "https://i.ibb.co/bjJzsQdL/IMG-5525.jpg"
+];
+
+let current = 0;
+let autoSlideTimeout = null;
+const slidesContainer = document.getElementById("slides");
+
 function renderImagesIfNeeded() {
-  if(box.querySelectorAll('.img').length === 0){
-    images.forEach(src=>{
-      const img = document.createElement('img');
+  if (slidesContainer.querySelectorAll(".img").length === 0) {
+    images.forEach(src => {
+      const img = document.createElement("img");
       img.src = src;
-      img.className = 'img';
-      box.appendChild(img);
+      img.className = "img";
+      slidesContainer.appendChild(img);
     });
   }
 }
-function showImage(idx){
+
+function showImage(idx) {
   renderImagesIfNeeded();
-  const imgList = box.querySelectorAll('.img');
-  imgList.forEach((img,i)=>{
-    if(i === idx) setTimeout(()=>img.classList.add('active'), 160);
-    else img.classList.remove('active');
+  const imgList = slidesContainer.querySelectorAll(".img");
+  imgList.forEach((img, i) => {
+    if (i === idx) img.classList.add("active");
+    else img.classList.remove("active");
   });
 }
+
 function showPrev() {
   current = (current - 1 + images.length) % images.length;
   showImage(current);
   setupAutoSlide();
 }
+
 function showNext() {
   current = (current + 1) % images.length;
   showImage(current);
   setupAutoSlide();
 }
+
 function setupAutoSlide() {
   clearAutoSlide();
   autoSlideTimeout = setTimeout(function autoSlideFn() {
@@ -235,33 +110,101 @@ function setupAutoSlide() {
     autoSlideTimeout = setTimeout(autoSlideFn, 5000);
   }, 5000);
 }
-function clearAutoSlide() { if(autoSlideTimeout) clearTimeout(autoSlideTimeout); }
-function showSurprise() {
-  box = document.getElementById('box');
-  const btn = document.getElementById('boxBtn');
-  btn.classList.add('hide');
-  fireworkShow(()=>{
-    box.style.display = 'block';
-    current = 0;
-    showImage(current);
-    setupAutoSlide();
-  });
+
+function clearAutoSlide() {
+  if (autoSlideTimeout) clearTimeout(autoSlideTimeout);
 }
-document.getElementById('passwordBtn').onclick = function() {
-  const val = document.getElementById('passwordInput').value.trim();
-  if(val === "2802") {
-    document.getElementById('passwordScreen').style.display = "none";
-    document.getElementById('giftScreen').style.display = "flex";
-  } else {
-    document.getElementById('passwordError').innerText = "Неверный пароль!";
-  }
-};
-document.addEventListener("DOMContentLoaded", ()=>{
-  box = document.getElementById('box');
-  document.getElementById('boxBtn').addEventListener('click', showSurprise);
-  document.getElementById('prevBtn').addEventListener('click', showPrev);
-  document.getElementById('nextBtn').addEventListener('click', showNext);
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("prevBtn").addEventListener("click", showPrev);
+  document.getElementById("nextBtn").addEventListener("click", showNext);
 });
 </script>
+
+<style>
+body {
+  font-family: "Lucida Grande", sans-serif;
+  margin: 0;
+  background: #ffe6f0; /* нежно-розовый фон */
+  overflow: hidden;
+}
+
+/* ---------- Коробка ---------- */
+.mt-40 { margin-top: 5rem; text-align: center; }
+.joggle { animation: joggle 4.5s ease-in-out infinite; }
+.gift-box__emoji { font-size: 13em; }
+.gift-box__btn {
+  font-size: 2em;
+  margin-top: 1em;
+  background: red;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  cursor: pointer;
+}
+.gift-box__emoji--claimed { transition: transform 500ms ease; transform: scale(1.6) rotate(12deg); }
+.gift-box__message { margin-top: 1.5em; font-size: 2em; transition: all 500ms ease; }
+.gift-box__message--hidden { opacity: 0; transform: scale(0.95); }
+@keyframes joggle { 0%,33%,100%{transform:rotate(0deg);} 3.33%{transform:rotate(-10deg);} 6.67%{transform:rotate(12deg);} 10%{transform:rotate(-10deg);} 13.33%{transform:rotate(9deg);} 16.67%{transform:rotate(0deg);} }
+
+/* ---------- Слайды — на весь экран ---------- */
+#slides {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #ffe6f0; /* нежно-розовый фон */
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  z-index: 9999;
+}
+.img { position: absolute; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 1s ease; }
+.img.active { opacity: 1; }
+
+/* ---------- Кнопки перелистывания — красные ---------- */
+.navbtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: red;
+  color: white;
+  border: none;
+  font-size: 60px;
+  border-radius: 14px;
+  padding: 0 20px;
+  cursor: pointer;
+  z-index: 10000;
+  opacity: 0.8;
+}
+.navbtn:hover { opacity: 1; }
+#prevBtn { left: 20px; }
+#nextBtn { right: 20px; }
+
+@media (max-width: 600px) {
+  .gift-box__emoji { font-size: 9em; }
+  .gift-box__btn { font-size: 1.5em; }
+}
+</style>
+</head>
+
+<body>
+<div class="mt-40">
+  <div class="gift-box" data-controller="gift-box">
+    <div class="gift-box__emoji joggle" data-gift-box-target="emoji">🎁</div>
+    <button class="gift-box__btn" data-action="gift-box#claim" data-gift-box-target="claimBtn">
+      НЕ ОТКРЫВАЙ КОРОБКУ!
+    </button>
+    <div class="gift-box__message gift-box__message--hidden" data-gift-box-target="message"></div>
+  </div>
+</div>
+
+<!-- ---------- Слайды ---------- -->
+<div id="slides">
+  <button class="navbtn" id="prevBtn">⟨</button>
+  <button class="navbtn" id="nextBtn">⟩</button>
+</div>
 </body>
 </html>
