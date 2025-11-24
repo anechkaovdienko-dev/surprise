@@ -31,6 +31,7 @@ class GiftBoxController extends Controller {
       this.messageTarget.classList.remove("gift-box__message--hidden");
       this.emojiTarget.hidden = true;
 
+      // 🔥 Конфетти
       const confettiLayer = document.createElement("canvas");
       confettiLayer.style.position = "fixed";
       confettiLayer.style.top = 0;
@@ -47,6 +48,7 @@ class GiftBoxController extends Controller {
         origin: { y: 0.25 }
       });
 
+      // Показ слайдов
       const slidesContainer = document.getElementById("slides");
       slidesContainer.style.display = "flex";
       current = 0;
@@ -58,6 +60,7 @@ class GiftBoxController extends Controller {
 
 application.register("gift-box", GiftBoxController);
 
+// ---------- Слайды ----------
 const images = [
   "https://i.ibb.co/4ZCLJXQ3/IMG-5523.jpg",
   "https://i.ibb.co/bjJzsQdL/IMG-5525.jpg"
@@ -73,7 +76,7 @@ function renderImagesIfNeeded() {
       const img = document.createElement("img");
       img.src = src;
       img.className = "img";
-      slidesContainer.appendChild(img);
+      slidesContainer.querySelector(".slide-wrapper").appendChild(img);
     });
   }
 }
@@ -126,6 +129,7 @@ body {
   overflow: hidden;
 }
 
+/* ---------- Коробка ---------- */
 .mt-40 { margin-top: 5rem; text-align: center; }
 .joggle { animation: joggle 4.5s ease-in-out infinite; }
 .gift-box__emoji { font-size: 13em; }
@@ -144,6 +148,7 @@ body {
 .gift-box__message--hidden { opacity: 0; transform: scale(0.95); }
 @keyframes joggle { 0%,33%,100%{transform:rotate(0deg);} 3.33%{transform:rotate(-10deg);} 6.67%{transform:rotate(12deg);} 10%{transform:rotate(-10deg);} 13.33%{transform:rotate(9deg);} 16.67%{transform:rotate(0deg);} }
 
+/* ---------- Слайды — на весь экран ---------- */
 #slides {
   display: none;
   position: fixed;
@@ -156,9 +161,27 @@ body {
   overflow: hidden;
   z-index: 9999;
 }
-.img { position: absolute; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 1s ease; }
+
+.slide-wrapper {
+  position: relative;
+  width: 90%;
+  height: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
 .img.active { opacity: 1; }
 
+/* ---------- Кнопки перелистывания — красные ---------- */
 .navbtn {
   position: absolute;
   top: 50%;
@@ -174,20 +197,20 @@ body {
   opacity: 0.8;
 }
 .navbtn:hover { opacity: 1; }
-#prevBtn { left: 20px; }
-#nextBtn { right: 20px; }
+#prevBtn { left: -70px; }
+#nextBtn { right: -70px; }
 
+/* ---------- Мобильные кнопки ---------- */
 @media (max-width: 600px) {
+  .navbtn {
+    font-size: 40px;
+    padding: 0 15px;
+    opacity: 0.5;
+  }
+  #prevBtn { left: -50px; }
+  #nextBtn { right: -50px; }
   .gift-box__emoji { font-size: 9em; }
   .gift-box__btn { font-size: 1.5em; }
-
-  .navbtn {
-    font-size: 36px;
-    padding: 0 12px;
-    opacity: 0.6;
-  }
-  #prevBtn { left: 20px; top: 50%; transform: translateY(-50%); }
-  #nextBtn { right: 20px; top: 50%; transform: translateY(-50%); }
 }
 </style>
 </head>
@@ -203,9 +226,12 @@ body {
   </div>
 </div>
 
+<!-- ---------- Слайды ---------- -->
 <div id="slides">
-  <button class="navbtn" id="prevBtn">⟨</button>
-  <button class="navbtn" id="nextBtn">⟩</button>
+  <div class="slide-wrapper">
+    <button class="navbtn" id="prevBtn">⟨</button>
+    <button class="navbtn" id="nextBtn">⟩</button>
+  </div>
 </div>
 </body>
 </html>
