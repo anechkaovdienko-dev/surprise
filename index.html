@@ -69,18 +69,30 @@ function clearAutoSlide() {
 const CORRECT_PASS = "2802";
 
 function claim() {
-    // 1. Скрываем кнопку "НЕ ОТКРЫВАЙ" и начинаем анимацию
+    // 1. Скрываем основной контент и показываем модал пароля
+    document.getElementById('mainContent').hidden = true;
+    document.getElementById('passwordModal').style.display = 'flex';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+}
+
+function startConfettiAndSlides() {
     const emoji = document.getElementById('giftEmoji');
     const claimBtn = document.getElementById('claimBtn');
     const message = document.getElementById('giftMessage');
     const mainContent = document.getElementById('mainContent');
+    const slidesContainer = document.getElementById("slides");
 
+    // 1. Показываем основной контент обратно для анимации
+    mainContent.hidden = false;
+    
+    // 2. Анимация открывания
     emoji.classList.remove("joggle");
     void emoji.offsetWidth;
     emoji.classList.add("gift-box__emoji--claimed");
     claimBtn.hidden = true;
-    
-    // 2. Запускаем конфетти и показываем слайды
+
+    // 3. Запускаем конфетти и показываем слайды
     setTimeout(() => {
         message.classList.remove("gift-box__message--hidden");
         emoji.hidden = true;
@@ -103,9 +115,12 @@ function claim() {
         });
 
         // Показ слайдов
-        const slidesContainer = document.getElementById("slides");
         slidesContainer.style.display = "flex";
-        mainContent.hidden = true; // Скрываем коробку после запуска слайдов
+        
+        // !!! ИСПРАВЛЕНИЕ: МЫ СКРЫВАЕМ КОРОБКУ ТОЛЬКО ПОТОМ, ЧТОБЫ УВИДЕТЬ СЛАЙДЫ
+        setTimeout(() => {
+            mainContent.hidden = true; 
+        }, 100); // Небольшая задержка, чтобы slides точно перекрыли mainContent
 
         current = 0;
         showImage(current);
@@ -113,6 +128,7 @@ function claim() {
         
     }, 500);
 }
+
 
 function checkPassword() {
     const passwordInput = document.getElementById('passwordInput');
@@ -129,9 +145,9 @@ function checkPassword() {
         return;
     }
 
-    // ИСПРАВЛЕНИЕ: Пароль верный: Скрываем модал и показываем основной контент (коробку)
+    // Пароль верный: Скрываем модал и запускаем анимацию
     document.getElementById('passwordModal').style.display = 'none';
-    document.getElementById('mainContent').hidden = false;
+    startConfettiAndSlides();
 }
 
 function handleKeydown(event) {
@@ -190,6 +206,8 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 10000;
+    /* ИЗМЕНЕНИЕ: Изначально скрыто */
+    display: none; 
 }
 
 .password-box {
@@ -327,7 +345,8 @@ body {
 </head>
 
 <body>
-<div id="mainContent" class="mt-40" hidden>
+<!-- ИЗМЕНЕНИЕ: Изначально видимо (убрано hidden) -->
+<div id="mainContent" class="mt-40">
   <div class="gift-box">
     <div id="giftEmoji" class="gift-box__emoji joggle">🎁</div>
     <button id="claimBtn" class="gift-box__btn">
@@ -338,10 +357,10 @@ body {
   <div id="giftMessage" class="gift-box__message gift-box__message--hidden"></div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПАРОЛЯ (Изначально видимо) -->
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПАРОЛЯ (Изначально скрыто) -->
 <div id="passwordModal">
     <div class="password-box">
-        <p>Дата и месяц моего рождения (4 цифры)</p>
+        <p>Самая важная для меня дата (4 цифры):</p>
         <input 
             type="password" 
             id="passwordInput" 
