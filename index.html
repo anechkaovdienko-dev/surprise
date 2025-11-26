@@ -1,4 +1,4 @@
-x<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -117,10 +117,10 @@ function startConfettiAndSlides() {
         // Показ слайдов
         slidesContainer.style.display = "flex";
         
-        // !!! ИСПРАВЛЕНИЕ: МЫ СКРЫВАЕМ КОРОБКУ ТОЛЬКО ПОТОМ, ЧТОБЫ УВИДЕТЬ СЛАЙДЫ
+        // Скрываем коробку после того, как слайды точно загрузились
         setTimeout(() => {
             mainContent.hidden = true; 
-        }, 100); // Небольшая задержка, чтобы slides точно перекрыли mainContent
+        }, 100); 
 
         current = 0;
         showImage(current);
@@ -157,6 +157,9 @@ function handleKeydown(event) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // !!! ИСПРАВЛЕНИЕ: ПРЕДВАРИТЕЛЬНАЯ ЗАГРУЗКА КАРТИНОК
+    renderImagesIfNeeded(); 
+    
     document.getElementById("prevBtn").addEventListener("click", showPrev);
     document.getElementById("nextBtn").addEventListener("click", showNext);
     document.getElementById("claimBtn").addEventListener("click", claim);
@@ -167,6 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <style>
+/* ... (СТИЛИ ОСТАЛИСЬ БЕЗ ИЗМЕНЕНИЙ) */
 body {
   font-family: "Lucida Grande", sans-serif;
   margin: 0;
@@ -345,7 +349,7 @@ body {
 </head>
 
 <body>
-<!-- ИЗМЕНЕНИЕ: Изначально видимо (убрано hidden) -->
+<!-- ИЗМЕНЕНИЕ: Изначально видимо -->
 <div id="mainContent" class="mt-40">
   <div class="gift-box">
     <div id="giftEmoji" class="gift-box__emoji joggle">🎁</div>
